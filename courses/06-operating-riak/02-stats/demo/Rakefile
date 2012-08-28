@@ -1,0 +1,129 @@
+require 'rubygems'
+require 'bundler'
+require 'riak'
+
+begin
+  Bundler.setup(:default, :development, :test)
+rescue Bundler::BundlerError => e
+  $stderr.puts e.message
+  $stderr.puts "Run `bundle install` to install missing gems"
+  exit e.status_code
+end
+
+namespace :stats do
+  task :purge do
+    client = Riak::Client.new
+    bucket = client.bucket("test")
+    (1..1000).each do |i|
+      object = bucket.get("Obj#{i}")
+      object.delete
+    end
+    (1..1000).each do |i|
+      object = bucket.get("LargeObj#{i}")
+      object.delete
+    end
+  end
+  task :demo1 do
+    puts "demo1: Before"
+    puts "--------------------------------------------"
+    puts `riak-admin status | egrep "node_(put|get)"`
+    puts "--------------------------------------------"
+    # gets and puts
+    client = Riak::Client.new
+    bucket = client.bucket("test")
+    (1..1000).each do |i|
+      object = bucket.get_or_new("Obj#{i}")
+      object.data = "This is just test data"
+      object.content_type = "text/plain"
+      object.store
+    end
+    puts "demo1: After"
+    puts "--------------------------------------------"
+    puts `riak-admin status | egrep "node_(put|get)"`
+    puts "--------------------------------------------"
+  end
+  task :demo2 do
+    puts "demo2: Before"
+    puts "--------------------------------------------"
+    puts `riak-admin status | egrep "node_(put|get)"`
+    puts "--------------------------------------------"
+    client = Riak::Client.new
+    bucket = client.bucket("test")
+    (1..1000).each do |i|
+      object = bucket.get("Obj#{i}")
+    end
+    puts "demo2: After"
+    puts "--------------------------------------------"
+    puts `riak-admin status | egrep "node_(put|get)"`
+    puts "--------------------------------------------"
+  end
+  task :demo3 do
+    puts "demo3: Before"
+    puts "--------------------------------------------"
+    puts `riak-admin status | egrep "node_(put|get)"`
+    puts "--------------------------------------------"
+    # get/put larger objects
+    client = Riak::Client.new
+    bucket = client.bucket("test")
+    value = ""
+    (0..2048).each {|i| value += "A"}
+    (1..1000).each do |i|
+      object = bucket.get_or_new("LargeObj#{i}")
+      object.data = value
+      object.content_type = "text/plain"
+      object.store
+    end
+    puts "demo3: After"
+    puts "--------------------------------------------"
+    puts `riak-admin status | egrep "node_(put|get)"`
+    puts "--------------------------------------------"
+  end
+  task :demo4 do
+    puts "demo4: Before"
+    puts "--------------------------------------------"
+    puts `riak-admin status | egrep "node_(put|get)"`
+    puts "--------------------------------------------"
+    
+    # get/put larger objects
+    client = Riak::Client.new
+    bucket = client.bucket("test")
+    (1..1000).each do |i|
+      object = bucket.get("LargeObj#{i}")
+    end
+    puts "demo4: After"
+    puts "--------------------------------------------"
+    puts `riak-admin status | egrep "node_(put|get)"`
+    puts "--------------------------------------------"
+    
+  end
+  task :demo5 do
+    puts "demo5: Before"
+    puts "--------------------------------------------"
+    puts `riak-admin status | egrep "node_(put|get)"`
+    puts "--------------------------------------------"
+    
+    # make siblings
+    client = Riak::Client.new
+    bucket = client.bucket("test")
+    bucket.allow_mult = true
+    values = ["", ""]
+    (0..2048).each do |i|
+      values[0] += "B"
+      values[1] += "C"
+    end
+    (1..1000).each do |i|
+      object1 = bucket.get("LargeObj#{i}")
+      object2 = bucket.get("LargeObj#{i}")
+      object1.data = values[0]
+      object1.store
+      object2.data = values[1]
+      object2.store
+    end
+    
+    puts "demo5: After"
+    puts "--------------------------------------------"
+    puts `riak-admin status | egrep "node_(put|get)"`
+    puts "--------------------------------------------"
+    
+  end
+end

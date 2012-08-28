@@ -1,0 +1,10 @@
+source :rubygems
+
+gem "rake", "0.8.7"
+
+git "git://github.com/basho/riak-ruby-client.git" do
+  gem 'riak-client'
+end
+
+group :development, :test do
+end

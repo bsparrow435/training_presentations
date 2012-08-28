@@ -1,0 +1,17 @@
+<add>
+        <doc>
+                <field name="id">dan</field>
+                <field name="name">dan</field>
+                <field name="groups">da trainer</field>
+        </doc>
+        <doc>
+                <field name="id">ian</field>
+                <field name="name">ian</field>
+                <field name="groups">da trainer</field>
+        </doc>
+        <doc>
+                <field name="id">joe</field>
+                <field name="name">joe</field>
+                <field name="groups">ps trainer</field>
+        </doc>
+</add>
